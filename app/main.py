@@ -1,10 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import users
+from .api import users, auth
 from .database import Base, engine
 
-# Créer les tables si elles n'existent pas
-Base.metadata.create_all(bind=engine)
+# Système de retry pour la connexion à la DB
+retries = 5
+while retries > 0:
+    try:
+        Base.metadata.create_all(bind=engine)
+        break
+    except OperationalError:
+        retries -= 1
+        print(f"Attente de la DB... ({retries} essais restants)")
+        time.sleep(2)
 
 app = FastAPI()
 
@@ -27,4 +35,5 @@ app.add_middleware(
 def read_root():
     return {"message": "API is running!"}
 
+app.include_router(auth.router)
 app.include_router(users.router)

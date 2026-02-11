@@ -1,1 +1,28 @@
-**/__pycache__/
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# --- Environnement & Sécurité (CRUCIAL) ---
+.env
+.flaskenv
+*.secret
+
+# --- Base de données ---
+*.db
+*.sqlite3
+
+# --- IDE & Éditeurs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Système ---
+.DS_Store
+Thumbs.db

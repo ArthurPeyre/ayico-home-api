@@ -5,7 +5,7 @@ import os
 DATABASE_URL = "postgresql+psycopg2://ayico:ayico@db:5432/ayico_home"
 
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 # Dependency pour FastAPI
