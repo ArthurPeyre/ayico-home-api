@@ -1,18 +1,29 @@
-from ..models import user
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .. import database, schemas
+from ..models import user
+from ..core.security import get_password_hash
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["Users"])
 
-@router.get("/")
+@router.get("/", response_model=list[schemas.UserRead])
 def get_users(db: Session = Depends(database.get_db)):
     return db.query(user.User).all()
 
-@router.post("/")
+@router.post("/", response_model=schemas.UserRead)
 def create_user(newUser: schemas.UserCreate, db: Session = Depends(database.get_db)):
-    user = user.User(name=newUser.name, email=newUser.email, hashed_password=newUser)
-    db.add(user)
+
+    existing_user = db.query(user.User).filter(user.User.email == newUser.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    db_user = user.User(
+        name=newUser.name,
+        email=newUser.email,
+        hashed_password=get_password_hash(newUser.password)
+    )
+    db.add(db_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(db_user)
+
+    return db_user
